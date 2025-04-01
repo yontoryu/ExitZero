@@ -258,13 +258,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalRotation: {x: 0.104679115, y: -0.6993156, z: 0.104679145, w: 0.6993156}
+  m_LocalPosition: {x: 22.28, y: 7.45, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 17.027, y: -90, z: 0}
 --- !u!114 &330585547
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -491,11 +491,10 @@ GameObject:
   - component: {fileID: 1489719455}
   - component: {fileID: 1489719454}
   - component: {fileID: 1489719453}
-  - component: {fileID: 1489719457}
   - component: {fileID: 1489719458}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -585,25 +584,12 @@ Transform:
   m_GameObject: {fileID: 1489719452}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 20, y: 5.14, z: 0}
+  m_LocalPosition: {x: 18, y: 5.14, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1489719457
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1489719452}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7cc74ce316bcd2cb28a0cbb0be3b1810, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mapSection: {fileID: 3585884768322220447, guid: 964c8615ee235ec19bf70ef9862a073e, type: 3}
 --- !u!54 &1489719458
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -647,9 +633,13 @@ PrefabInstance:
       propertyPath: m_Center.x
       value: 6
       objectReference: {fileID: 0}
+    - target: {fileID: 1598216115129371895, guid: 964c8615ee235ec19bf70ef9862a073e, type: 3}
+      propertyPath: velocity
+      value: 15
+      objectReference: {fileID: 0}
     - target: {fileID: 2001057265457407041, guid: 964c8615ee235ec19bf70ef9862a073e, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 2001057265457407041, guid: 964c8615ee235ec19bf70ef9862a073e, type: 3}
       propertyPath: m_LocalPosition.y
