@@ -3,6 +3,7 @@
 public class MoveSection : MonoBehaviour
 {
     public float velocity = 15;
+    public GameObject mapSection;
     
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -20,10 +21,29 @@ public class MoveSection : MonoBehaviour
     {
         if (other.gameObject.CompareTag("Destroy")) {
             Destroy(gameObject);
+            Debug.Log("destroyed map section");
         }
         if (other.gameObject.CompareTag("Player")) {
-            Instantiate(gameObject, new Vector3(-28.45037f, 0, 0), Quaternion.identity);
-            Debug.Log("test");
+            GenerateNewMapSection();
         }
+    }
+
+    private void GenerateNewMapSection() {
+        Renderer renderer = gameObject.GetComponentsInChildren<Renderer>()[0];
+        if (renderer == null) return;
+        
+        float XEndOfMapSection = renderer.bounds.min.x;
+
+        GameObject newSection = Instantiate(gameObject, Vector3.zero, Quaternion.identity);
+
+        Renderer newRenderer = newSection.GetComponentsInChildren<Renderer>()[0];
+        if (newRenderer == null) return;
+
+        float newX = XEndOfMapSection - newRenderer.bounds.extents.x;
+        Vector3 newPosition = new Vector3(newX, transform.position.y, transform.position.z);
+
+        newSection.transform.position = newPosition;
+
+        Debug.Log("new map section generated at position " + newPosition);
     }
 }

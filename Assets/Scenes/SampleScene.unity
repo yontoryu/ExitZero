@@ -635,8 +635,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1598216115129371895, guid: 964c8615ee235ec19bf70ef9862a073e, type: 3}
       propertyPath: velocity
-      value: 15
+      value: 20
       objectReference: {fileID: 0}
+    - target: {fileID: 1598216115129371895, guid: 964c8615ee235ec19bf70ef9862a073e, type: 3}
+      propertyPath: mapSection
+      value: 
+      objectReference: {fileID: 3585884768322220447, guid: 964c8615ee235ec19bf70ef9862a073e, type: 3}
     - target: {fileID: 2001057265457407041, guid: 964c8615ee235ec19bf70ef9862a073e, type: 3}
       propertyPath: m_LocalPosition.x
       value: 2
