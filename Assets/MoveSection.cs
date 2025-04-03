@@ -1,24 +1,20 @@
- using UnityEngine;
+using UnityEngine;
 
-public class MoveSection : MonoBehaviour
-{
+public class MoveSection : MonoBehaviour {
     public float velocity = 15;
     public GameObject mapSection;
-    
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
+    void Start() {
+
     }
 
     // Update is called once per frame
-    void Update()
-    {
+    void Update() {
         transform.position += new Vector3(velocity, 0, 0) * Time.deltaTime;
     }
 
-    private void OnTriggerEnter(Collider other)
-    {
+    private void OnTriggerEnter(Collider other) {
         if (other.gameObject.CompareTag("Destroy")) {
             Destroy(gameObject);
             Debug.Log("destroyed map section");
@@ -31,7 +27,7 @@ public class MoveSection : MonoBehaviour
     private void GenerateNewMapSection() {
         Renderer renderer = gameObject.GetComponentsInChildren<Renderer>()[0];
         if (renderer == null) return;
-        
+
         float XEndOfMapSection = renderer.bounds.min.x;
 
         GameObject newSection = Instantiate(gameObject, Vector3.zero, Quaternion.identity);
