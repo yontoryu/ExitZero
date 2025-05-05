@@ -11,6 +11,11 @@ public class MapSectionManager : MonoBehaviour {
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start() {
+        if (sectionsAhead < 2) {
+            Debug.LogError("sectionsAhead must be at least 2");
+            sectionsAhead = 2;
+        }
+
         // generate the first section
         activeSections.Add(firstSection);
         for (int i = 0; i < sectionsAhead - 1; i++) {
