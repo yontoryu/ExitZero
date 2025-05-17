@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour {
@@ -10,12 +11,30 @@ public class PlayerMovement : MonoBehaviour {
     public Transform groundCheck;
     public float groundDistance = 0.4f;
     public LayerMask groundMask;
-    // Update is called once per frame
+
+    string[,] Buttons = { { "Horizontal_1", "Horizontal_2" }, { "Jump_1", "Jump_2" } };
+    string input_axis;
+    string input_jump;
+    string input_interact;
+    public bool Player1;
+
+    void Start() {
+        if (Player1) {
+            input_axis = Buttons[0, 0];
+            input_jump = Buttons[1, 0];
+        }
+        else {
+            input_axis = Buttons[0, 1];
+            input_jump = Buttons[1, 1];
+        }
+    }
+
     void Update() {
-        float horizontal = Input.GetAxisRaw("Horizontal");
+        float horizontal = Input.GetAxisRaw(input_axis);
         Vector3 direction = new Vector3(0f, 0f, horizontal).normalized;
 
         if (direction.magnitude >= 0.1f) {
+            Console.WriteLine("HORIZONTALLLLL, player1:" + Player1);
             controller.Move(direction.normalized * speed * Time.deltaTime);
         }
 
@@ -27,7 +46,7 @@ public class PlayerMovement : MonoBehaviour {
             velocity.y = -2f;
         }
 
-        if (Input.GetButtonDown("Jump") && isGrounded) {
+        if (Input.GetButtonDown(input_jump) && isGrounded) {
             velocity.y = Mathf.Sqrt(jumpHeight * -2 * gravity);
         }
 
