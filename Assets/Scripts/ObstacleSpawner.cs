@@ -2,6 +2,9 @@ using UnityEngine;
 
 public class ObstacleSpawner : MonoBehaviour {
     public float spawnRate;
+    public float spawnRateRandomness;
+    public GameObject[] players;
+    public GameObject MapSection;
     public float spawnRandomness;
     public GameObject[] obstacles;
 
@@ -17,6 +20,10 @@ public class ObstacleSpawner : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
+
+    }
+
+    void GeneratePlayerPaths(GameObject player) {
 
     }
 }
