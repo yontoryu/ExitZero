@@ -62,7 +62,6 @@ public class MapSectionManager : MonoBehaviour {
         Vector3 newPosition = new Vector3(newX, lastSection.transform.position.y, lastSection.transform.position.z);
 
         newSection.transform.position = newPosition;
-        Debug.Log("New section position: " + newSection.transform.position);
 
         return newSection;
     }

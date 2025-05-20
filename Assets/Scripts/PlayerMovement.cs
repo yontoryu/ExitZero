@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour {
     public CharacterController controller;
-    public float speed = 12f;
+    public float horizontal_speed = 12f;
     public float jumpHeight = 3f;
     public float gravity = -9.81f;
     Vector3 velocity;
@@ -11,50 +11,57 @@ public class PlayerMovement : MonoBehaviour {
     public Transform groundCheck;
     public float groundDistance = 0.4f;
     public LayerMask groundMask;
+    public Animator animator;
 
-    string[,] Buttons = { { "Horizontal_1", "Horizontal_2" }, { "Jump_1", "Jump_2" } };
-    string input_axis;
+    string[,] Buttons = { { "Horizontal_1", "Horizontal_2" }, { "Jump_1", "Jump_2" }, { "Slide_1", "Slide_2" }, { "Interact_1", "Interact_2" } };
+    string input_horizontal;
     string input_jump;
+    string input_slide;
     string input_interact;
     public bool Player1;
 
     void Start() {
         if (Player1) {
-            input_axis = Buttons[0, 0];
+            input_horizontal = Buttons[0, 0];
             input_jump = Buttons[1, 0];
+            input_slide = Buttons[2, 0];
         }
         else {
-            input_axis = Buttons[0, 1];
+            input_horizontal = Buttons[0, 1];
             input_jump = Buttons[1, 1];
+            input_slide = Buttons[2, 1];
         }
     }
 
     void Update() {
-        float horizontal = Input.GetAxisRaw(input_axis);
-        Vector3 direction = new Vector3(0f, 0f, horizontal).normalized;
+        // Move horizontally
+        float horizontal = Input.GetAxisRaw(input_horizontal);
+        Vector3 horizontal_movement = new Vector3(0f, 0f, horizontal).normalized * horizontal_speed;
+        controller.Move(horizontal_movement * Time.deltaTime);
 
-        if (direction.magnitude >= 0.1f) {
-            Console.WriteLine("HORIZONTALLLLL, player1:" + Player1);
-            controller.Move(direction.normalized * speed * Time.deltaTime);
-        }
-
-        //jump
-
+        // Ground Check
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
-
-        if (isGrounded && velocity.y < 0) {
+        if (controller.isGrounded && velocity.y < 0) {
             velocity.y = -2f;
         }
 
+        // Jump
         if (Input.GetButtonDown(input_jump) && isGrounded) {
+            animator.SetBool("isJumping", true);
             velocity.y = Mathf.Sqrt(jumpHeight * -2 * gravity);
+            Debug.Log("Starting to Jump");
+        }
+        else if (isGrounded) {
+            animator.SetBool("isJumping", false);
+            Debug.Log("Grounded");
+        }
+        else if (!isGrounded) {
+            Debug.Log("In the Air");
         }
 
-        //gravity
-
+        // Gravity
         velocity.y += gravity * Time.deltaTime;
-
         controller.Move(velocity * Time.deltaTime);
-
     }
+
 }
