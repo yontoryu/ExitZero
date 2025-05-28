@@ -813,7 +813,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: cf995718257b1f3da85cff18095586ed, type: 3}
       propertyPath: m_Name
-      value: Y Bot@Running
+      value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: cf995718257b1f3da85cff18095586ed, type: 3}
       propertyPath: m_IsActive
@@ -1519,6 +1519,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: cf995718257b1f3da85cff18095586ed, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2836275985872106412}
+    - targetCorrespondingSourceObject: {fileID: -1781356600409242780, guid: cf995718257b1f3da85cff18095586ed, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7177793826506526084}
   m_SourcePrefab: {fileID: 100100000, guid: cf995718257b1f3da85cff18095586ed, type: 3}
 --- !u!4 &1635963536237400136 stripped
 Transform:
@@ -1600,3 +1603,31 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   isPlayer1: 0
+--- !u!1 &8537132515219879111 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -1781356600409242780, guid: cf995718257b1f3da85cff18095586ed, type: 3}
+  m_PrefabInstance: {fileID: 1242612337535448995}
+  m_PrefabAsset: {fileID: 0}
+--- !u!136 &7177793826506526084
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8537132515219879111}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.12
+  m_Height: 0.3
+  m_Direction: 1
+  m_Center: {x: 0, y: 0.09, z: 0}
