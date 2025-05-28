@@ -1,99 +1,110 @@
 using System;
 using UnityEngine;
+using UnityEngine.Subsystems;
 
 public class PlayerMovementRB : MonoBehaviour {
-    public float horizontal_speed = 12f;
+    [Header("Movement Settings")]
+    public float horizontalSpeed = 12f;
     public float jumpHeight = 3f;
     public float gravity = -25f;
-    public float boostedFallSpeed = 2f; // Gravity applied when jumping to sliding
-    bool boostFallSpeed = false;
+    public float boostedFallSpeed = 2f;
+    private bool boostFall = false;
+    private Vector3 velocity;
 
+    [Header("Ground Check")]
     public Transform groundCheck;
     public float groundDistance = 0.4f;
     public LayerMask groundMask;
-    public Animator animator;
-
-    private Rigidbody rb;
-    private Vector3 velocity;
     private bool isGrounded;
 
-    string[,] Buttons = { { "Horizontal_1", "Horizontal_2" }, { "Jump_1", "Jump_2" }, { "Slide_1", "Slide_2" }, { "Interact_1", "Interact_2" } };
-    string input_horizontal;
-    string input_jump;
-    string input_slide;
-    string input_interact;
-    public bool Player1;
+    [Header("References")]
+    private Animator animator;
+    private Rigidbody rb;
+
+    [Header("Player Input Mapping")]
+    public bool isPlayer1;
+    private string inputJump;
+    private string inputSlide;
+    private string inputHorizontal;
 
     void Start() {
         rb = GetComponent<Rigidbody>();
+        animator = GetComponent<Animator>();
 
-        if (Player1) {
-            input_horizontal = Buttons[0, 0];
-            input_jump = Buttons[1, 0];
-            input_slide = Buttons[2, 0];
-        }
-        else {
-            input_horizontal = Buttons[0, 1];
-            input_jump = Buttons[1, 1];
-            input_slide = Buttons[2, 1];
-        }
+        AssignInputStrings();
+    }
+
+    private void AssignInputStrings() {
+        string prefix = isPlayer1 ? "_1" : "_2";
+        inputHorizontal = "Horizontal" + prefix;
+        inputJump = "Jump" + prefix;
+        inputSlide = "Slide" + prefix;
     }
 
     void Update() {
-        // Input
-        float horizontalInput = Input.GetAxisRaw(input_horizontal);
+        CheckGrounded();
 
-        bool wasGrounded = isGrounded;
-
-        // Ground Check
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
-        if (isGrounded && !wasGrounded) {
-            animator.SetBool("isJumping", false);
-            animator.SetBool("jumpToSlide", false); // Reset jump to slide state
-            Debug.Log("Grounded");
-        }
-
-        // If Player is grounded and jump button is pressed, start jumping
-        if (Input.GetButtonDown(input_jump) && isGrounded) {
-            animator.SetBool("isJumping", true);
-            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+        /* ------------------------------ Handle Inputs ----------------------------- */
+        // if player is grounded and jump button is pressed
+        if (Input.GetButtonDown(inputJump) && isGrounded) {
+            animator.SetBool("isJumping", true); // start the jump animation
+            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity); // set the velocity to sqrt(2 * g * h) (formula for a jump)
             Debug.Log("Jumping");
         }
 
-        // Apply gravity
-        if (!isGrounded && !boostFallSpeed) {
-            velocity.y += gravity * Time.deltaTime;
+        // if the slide button is pressed
+        if (Input.GetButtonDown(inputSlide)) {
+            // if the player is grounded
+            if (isGrounded) {
+                animator.SetTrigger("slide"); // start the slide animation
+                Debug.Log("Sliding");
+            }
+            else { // if the player is in the air
+                boostFall = true; // apply the boost for falling faster when jumping and wanting to slide
+                animator.SetBool("jumpToSlide", true); // Reset jump state
+                animator.SetBool("isJumping", false); // Reset jump state
+                animator.SetTrigger("slide"); // start the slide animation
+                Debug.Log("Jumping to Sliding");
+            }
         }
-        else if (!isGrounded && boostFallSpeed) {
-            velocity.y = Mathf.Lerp(velocity.y, -Mathf.Abs(boostedFallSpeed), Time.deltaTime * 10f);
-        }
-        else if (isGrounded && boostFallSpeed) {
-            boostFallSpeed = false; // Reset boost fall speed when grounded
-            velocity.y = -2f; // Reset vertical velocity when grounded
-        }
-        else if (velocity.y < 0) {
-            velocity.y = -2f;
-        }
+        /* --------------------------------------------------------------------------- */
 
-        // If the player is not grounded and the slide button is pressed, apply boosted fall speed
-        if (Input.GetButtonDown(input_slide) && !isGrounded) {
-            velocity.y = Mathf.Lerp(velocity.y, -Mathf.Abs(boostedFallSpeed), Time.deltaTime * 10f);
-            boostFallSpeed = true;
-            animator.SetBool("jumpToSlide", true); // Reset jump state
-            animator.SetBool("isJumping", false); // Reset jump state
-            animator.SetTrigger("slide");
-            Debug.Log("Jumping to Sliding");
-        }
-        // If the player is grounded and the slide button is pressed, slide
-        else if (Input.GetButtonDown(input_slide)) {
-            animator.SetTrigger("slide");
-            Debug.Log("Sliding");
-        }
+        ApplyGravity();
 
-        // Apply movement
-        Vector3 move = new Vector3(0f, velocity.y, horizontalInput * horizontal_speed);
-        rb.linearVelocity = new Vector3(move.x, move.y, move.z);  // Overwrite Rigidbody velocity directly
-        //Debug.Log("jump: " + animator.GetCurrentAnimatorStateInfo(0).IsName("Jump") + "\nslide: " + animator.GetCurrentAnimatorStateInfo(0).IsName("Slide") + "\tvelocity.y: " + rb.linearVelocity.y);
+        ApplyMovement();
+    }
+
+    private void CheckGrounded() {
+        bool wasGrounded = isGrounded; // save the previous grounded state
+        // Check if the player is grounded using a sphere check
+        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+
+        // if the player was not grounded and is now grounded, reset the jump and jumpToSlide states
+        if (isGrounded && !wasGrounded) {
+            animator.SetBool("isJumping", false);
+            animator.SetBool("jumpToSlide", false);
+        }
+    }
+
+    private void ApplyGravity() {
+        if (!isGrounded) {
+            if (boostFall) {
+                velocity.y = Mathf.Lerp(velocity.y, -Mathf.Abs(boostedFallSpeed), Time.deltaTime * 10f);
+            }
+            else {
+                velocity.y += gravity * Time.deltaTime;
+            }
+        }
+        else {
+            boostFall = false;
+            if (velocity.y < 0) velocity.y = -2f;
+        }
+    }
+
+    private void ApplyMovement() {
+        float horizontalInput = Input.GetAxisRaw(inputHorizontal);
+        Vector3 move = new Vector3(0f, velocity.y, horizontalInput * horizontalSpeed);
+        rb.linearVelocity = move;
     }
 
     void OnDrawGizmosSelected() {
