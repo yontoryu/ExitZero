@@ -2341,7 +2341,7 @@ MonoBehaviour:
   horizontal_speed: 12
   jumpHeight: 2.5
   gravity: -26
-  jumpToSlideGravityFactor: 1
+  boostedFallSpeed: -20
   groundCheck: {fileID: 2016878925}
   groundDistance: 0.05
   groundMask:
@@ -4342,7 +4342,7 @@ MonoBehaviour:
   horizontal_speed: 12
   jumpHeight: 2
   gravity: -26
-  jumpToSlideGravityFactor: 2
+  boostedFallSpeed: 2
   groundCheck: {fileID: 2839069696418193645}
   groundDistance: 0.05
   groundMask:
@@ -4950,7 +4950,7 @@ MonoBehaviour:
   horizontal_speed: 12
   jumpHeight: 2
   gravity: -26
-  jumpToSlideGravityFactor: 2
+  boostedFallSpeed: 2
   groundCheck: {fileID: 2839069696418193645}
   groundDistance: 0.05
   groundMask:
