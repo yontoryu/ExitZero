@@ -8,6 +8,7 @@ public class MapSectionManagerEditor : Editor {
         DrawDefaultInspector();
 
         MapSectionManager manager = (MapSectionManager)target;
+        manager.GetActiveSections();
 
         if (GUILayout.Button("Generate Sections")) {
             manager.ClearSections(); // Clear existing sections before generating new ones
