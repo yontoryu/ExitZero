@@ -27,7 +27,11 @@ public class PlayerMovementRB : MonoBehaviour {
     private string inputSlide;
     private string inputHorizontal;
 
-    void Start() {
+    // public float highestPoint = 0f; // Used to track the highest point reached during the jump
+    // bool isJumping = false; // Used to track if the player is currently jumping
+    // public GameObject torso;
+
+    void Awake() {
         rb = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
 
@@ -50,6 +54,8 @@ public class PlayerMovementRB : MonoBehaviour {
             animator.SetBool("isJumping", true); // start the jump animation
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity); // set the velocity to sqrt(2 * g * h) (formula for a jump)
             Debug.Log("Jumping");
+            // isJumping = true; // Set jumping state to true
+            // highestPoint = 0f;
         }
 
         // if the slide button is pressed
@@ -68,10 +74,18 @@ public class PlayerMovementRB : MonoBehaviour {
             }
         }
         /* --------------------------------------------------------------------------- */
+    }
 
+    void FixedUpdate() {
         ApplyGravity();
-
         ApplyMovement();
+        // if (isJumping) {
+        //     Collider torsoCollider = torso.GetComponent<Collider>();
+        //     // Check if the player has reached the highest point during the jump
+        //     if (torsoCollider.bounds.max.y > highestPoint) {
+        //         highestPoint = torsoCollider.bounds.max.y; // Update the highest point
+        //     }
+        // }
     }
 
     private void CheckGrounded() {
@@ -111,6 +125,16 @@ public class PlayerMovementRB : MonoBehaviour {
         if (groundCheck != null) {
             Gizmos.color = Color.red;
             Gizmos.DrawWireSphere(groundCheck.position, groundDistance);
+        }
+
+        Collider[] colliders = GetComponentsInChildren<Collider>();
+        if (colliders != null) {
+            Gizmos.color = Color.blue;
+
+
+            foreach (Collider collider in colliders) {
+                Gizmos.DrawWireCube(collider.bounds.center, collider.bounds.size);
+            }
         }
     }
 }
