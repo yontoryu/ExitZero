@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -44,7 +45,7 @@ public class MapSectionManager : MonoBehaviour {
         if (numActiveSections == 0) {
             // generate the first section at the origin
             newSection = Instantiate(mapSection, Vector3.zero, Quaternion.identity, transform);
-            newSection.GetComponent<Rigidbody>().position = transform.position;
+            newSection.transform.position = transform.position;
         }
         else {
             //get the last section to determine the position of the new section
@@ -58,16 +59,11 @@ public class MapSectionManager : MonoBehaviour {
 
             Vector3 newPosition;
             float newX;
-            if (onStart) {
-                newX = lastSection.transform.position.x - lastSectionCollider.bounds.size.x;
-                newPosition = new Vector3(newX, lastSection.transform.position.y, lastSection.transform.position.z);
-                newSection.transform.position = newPosition;
-            }
-            else {
-                newX = lastSection.GetComponent<Rigidbody>().position.x - lastSectionCollider.bounds.size.x;
-                newPosition = new Vector3(newX, lastSection.GetComponent<Rigidbody>().position.y, lastSection.GetComponent<Rigidbody>().position.z);
-                newSection.GetComponent<Rigidbody>().position = newPosition;
-            }
+
+            newX = lastSection.transform.position.x - lastSectionCollider.bounds.size.x;
+            newPosition = new Vector3(newX, lastSection.transform.position.y, lastSection.transform.position.z);
+            newSection.transform.position = newPosition;
+
         }
 
         newSection.name = "MapSection_" + currentSectionID;
@@ -100,10 +96,6 @@ public class MapSectionManager : MonoBehaviour {
         foreach (Transform child in transform)
             activeSections.Add(child.gameObject);
 
-        return activeSections;
-    }
-
-    public List<GameObject> GetActiveSections() {
         return activeSections;
     }
 
