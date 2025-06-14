@@ -479,7 +479,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   velocity: 15
   mapSection: {fileID: 1329609072505232936, guid: 49c462d9a3aa16ab295aec70b425cf37, type: 3}
-  sectionsAhead: 5
+  sectionsAhead: 3
   destroyDistance: 70
 --- !u!4 &541684063
 Transform:
@@ -519,9 +519,6 @@ MonoBehaviour:
   maxY: 10
   msManager: {fileID: 541684062}
   mapSectionTest: {fileID: 1401568094}
-  currentSpawnArea:
-    m_Center: {x: 0, y: 0, z: 0}
-    m_Extent: {x: 0, y: 0, z: 0}
   unsafelySpawnedObstacle: {fileID: 3387990700505033174, guid: 7c08342dedd28bb859c0e478d347617f, type: 3}
 --- !u!1001 &808322903
 PrefabInstance:

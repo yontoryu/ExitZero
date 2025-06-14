@@ -27,87 +27,115 @@ public class ObstacleSpawner : MonoBehaviour {
 
     [Header("MapSection Settings")]
     public MapSectionManager msManager;
-    private Queue<GameObject> sectionsToPopulate = new Queue<GameObject>();
-    private List<Bounds> activeSafeZones = new List<Bounds>();
+    private List<(GameObject, Vector3)> activeSafeZones = new List<(GameObject, Vector3)>();
+    private GameObject currentMapSection;
+    private int currentObstacleID = 0;
 
     [Header("Test")]
     public GameObject mapSectionTest;
-    public Bounds currentSpawnArea;
     public GameObject unsafelySpawnedObstacle;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Awake() {
+    public void CalculateBorders(GameObject mapSection) {
+        Transform wallLTransform = mapSection.transform.Find("Wall_left");
+        Collider wallLCollider = wallLTransform?.gameObject.GetComponent<Collider>();
+        borderL = wallLCollider.bounds.max.z;
+
+        Transform wallRTransform = mapSection.transform.Find("Wall_right");
+        Collider wallRCollider = wallRTransform?.gameObject.GetComponent<Collider>();
+        borderR = wallRCollider.bounds.min.z;
     }
 
-    void Start() {
-        sectionsToPopulate = GetActiveSections();
-
-        CalculateBorders(msManager.mapSection);
-        if (spawnRate < 1) {
-            spawnRate = 1;
-        }
-
-        PopulateSections();
-        //populateSection(mapSectionTest);
-    }
-
-    // Update is called once per frame
-    void Update() {
-
-    }
-
-    private void SpawnObstacle(GameObject mapSection) {
-        Obstacle obstacle = GetRandomObstacle();
-        Bounds spawnArea = GetSpawnArea(mapSection, obstacle);
-
-        currentSpawnArea = spawnArea;
-        int count = 0;
-        GameObject instantiatedObstacle;
-        Vector3 position;
-        GameObject lastInstantiatedWrongObstacle;
-
-        do {
-            position = GetRandomPositionInBounds(spawnArea);
-            count++;
-            lastInstantiatedWrongObstacle = Instantiate(unsafelySpawnedObstacle, position, Quaternion.identity, mapSection.transform);
-        } while (IsObstacleInsideSafeZone(obstacle, position) && count < maxSpawnAttempts);
-
-        Destroy(lastInstantiatedWrongObstacle);
-        instantiatedObstacle = Instantiate(obstacle.body, position, Quaternion.identity, mapSection.transform);
-        Bounds safeZone = GetSafeZone(obstacle, instantiatedObstacle);
-        activeSafeZones.Add(safeZone);
-        DisplaySafeZoneOnSelected(instantiatedObstacle, safeZone);
-        DisplaySpawnAreaOnSelected(instantiatedObstacle, spawnArea);
-    }
-
-    public void PopulateSections() {
-        // for each map section that is yet to be populated
-        while (sectionsToPopulate.Count > 0) {
-            GameObject mapSection = sectionsToPopulate.Dequeue();
-            for (int j = 0; j < spawnRate; j++) {
-                SpawnObstacle(mapSection);
-            }
-        }
-    }
-
-    public void populateSection(GameObject mapSection) {
+    public void PopulateSection(GameObject mapSection) {
+        currentMapSection = mapSection;
+        currentObstacleID = 0;
         for (int j = 0; j < spawnRate; j++) {
             SpawnObstacle(mapSection);
         }
     }
 
-    public void QueueSection(GameObject mapSection) {
-        if (mapSection != null) {
-            sectionsToPopulate.Enqueue(mapSection);
+    public void Refresh() {
+        // Liste der Obstacles aktualisieren, unnötige rausschmeißen
+        GameObject lastMapSection = msManager.GetSectionByID(currentMapSection.GetComponent<MapSectionID>().sectionID - 1);
+        string refresh = "-------------------- all Safe Zones --------------------\n";
+        refresh += "activeSafeZones (" + activeSafeZones.Count + "): " + printList(activeSafeZones) + "\n\n";
+        refresh += "current Map Section: " + currentMapSection.GetComponent<MapSectionID>().sectionID;
+        refresh += "\nlast Map Section: " + lastMapSection.GetComponent<MapSectionID>().sectionID;
+        refresh += "\n\n";
+
+        for (int i = activeSafeZones.Count - 1; i >= 0; i--) {
+            (GameObject obs, Vector3 safeZoneSize) = activeSafeZones[i];
+            refresh += "i = " + i + "\t";
+            if (!(obs.transform.parent.gameObject == currentMapSection || obs.transform.parent.gameObject == lastMapSection)) {
+                refresh += "obs: " + obs + "\tparent: " + obs.transform.parent + "\tcurrent: " + currentMapSection + "\tlast: " + lastMapSection;
+                activeSafeZones.RemoveAt(i);
+                DisplaySafeZoneOnSelected(obs, new Bounds(Vector3.zero, Vector3.zero));
+                DisplaySpawnAreaOnSelected(obs, new Bounds(Vector3.zero, Vector3.zero));
+                refresh += " ----> Removing\n";
+                continue;
+            }
+
+            DisplaySafeZoneOnSelected(obs, GetCurrentSafeZone(obs.transform.position, safeZoneSize));
+        }
+
+        Debug.Log(refresh + "\n\n\n");
+    }
+
+    string printList(List<(GameObject, Vector3)> a) {
+        string res = "";
+        foreach ((GameObject obs, Vector3 size) in a) {
+            res += "(" + obs.name + ", " + size + ");  ";
+        }
+        return res;
+    }
+
+    public void RemoveSectionReferences(GameObject mapSection) {
+        for (int i = 0; i < activeSafeZones.Count; i++) {
+            (GameObject obs, Vector3 safeZoneSize) = activeSafeZones[i];
+            if (!(obs.transform.parent == mapSection)) {
+                activeSafeZones.Remove((obs, safeZoneSize));
+            }
         }
     }
 
-    private bool IsObstacleInsideSafeZone(Obstacle obstacle, Vector3 position) {
-        Bounds boundsToTest = new Bounds(position, obstacle.body.GetComponent<Renderer>().bounds.size);
+    private void SpawnObstacle(GameObject mapSection) {
+        Obstacle obstacle = GetRandomObstacle();    // Generate a random Obstacle
+        Bounds spawnArea = GetSpawnArea(mapSection, obstacle);  // Get the Spawn Area according to the obstacle
 
-        foreach (Bounds safeZone in activeSafeZones) {
-            if (boundsToTest.Intersects(safeZone))
+        int count = 0;
+        GameObject instantiatedObstacle;
+        Vector3 position;
+        // Enable to display unsafely spawned obstacles
+        //GameObject lastInstantiatedWrongObstacle;
+
+        do {
+            position = GetRandomPositionInBounds(spawnArea);    // Get a random position in the Spawn Area
+            count++;
+
+            //lastInstantiatedWrongObstacle = Instantiate(unsafelySpawnedObstacle, position, Quaternion.identity, mapSection.transform);
+        } while (WouldSpawnSafely(obstacle, position) && count < maxSpawnAttempts);
+
+        //Destroy(lastInstantiatedWrongObstacle);
+        instantiatedObstacle = Instantiate(obstacle.body, position, Quaternion.identity, mapSection.transform);
+        instantiatedObstacle.name += "_" + mapSection.GetComponent<MapSectionID>().sectionID + "." + currentObstacleID;
+        currentObstacleID++;
+        Vector3 safeZoneSize = GetSafeZoneSize(obstacle);
+        activeSafeZones.Add((instantiatedObstacle, safeZoneSize));
+
+        // Display Gizmos of Spawn Area and Safe Zones
+        DisplaySafeZoneOnSelected(instantiatedObstacle, GetCurrentSafeZone(position, safeZoneSize));
+        DisplaySpawnAreaOnSelected(instantiatedObstacle, spawnArea);
+    }
+
+    private bool WouldSpawnSafely(Obstacle obstacle, Vector3 position) {
+        Bounds newObstacleBounds = new Bounds(position, obstacle.body.GetComponent<Renderer>().bounds.size);
+        Bounds newObstacleSafeZone = GetCurrentSafeZone(position, GetSafeZoneSize(obstacle));
+
+        foreach ((GameObject obsInstance, Vector3 safeZoneSize) in activeSafeZones) {
+            Bounds safeZone = GetCurrentSafeZone(obsInstance.transform.position, safeZoneSize);
+            if (newObstacleBounds.Intersects(safeZone) ||
+                obsInstance.GetComponent<Renderer>().bounds.Intersects(newObstacleSafeZone)) {
                 return true;
+            }
         }
 
         return false;
@@ -121,7 +149,6 @@ public class ObstacleSpawner : MonoBehaviour {
         // width of spawnArea = width of MapSection (from left to right wall) - width of obstacle - offset
         float sizeZ = borderR - borderL - obRenderer.bounds.size.z - 2 * spawnOffset;
         sizeZ = (sizeZ > 0) ? sizeZ : 0;
-        Debug.Log("obCollider.bounds.size.z = " + obRenderer.bounds.size.z);
 
         Transform groundTransform = mapSection.transform.Find("Ground");
         Renderer groundCollider = groundTransform?.gameObject.GetComponent<Renderer>();
@@ -139,21 +166,11 @@ public class ObstacleSpawner : MonoBehaviour {
             sizeY = 0;
             areaOriginY = obRenderer.bounds.extents.y + spawnOffset;
         }
+
         Vector3 areaOrigin = new Vector3(mapSection.transform.position.x, areaOriginY, mapSection.transform.position.z);
-        Debug.Log("areaOrigin: " + areaOrigin);
 
         // return length (X-Size of Ground) and width (sizeZ) of spawnArea
         return new Bounds(areaOrigin, new Vector3(sizeX, sizeY, sizeZ));
-    }
-
-    private void CalculateBorders(GameObject mapSection) {
-        Transform wallLTransform = mapSection.transform.Find("Wall_left");
-        Collider wallLCollider = wallLTransform?.gameObject.GetComponent<Collider>();
-        borderL = wallLCollider.bounds.max.z;
-
-        Transform wallRTransform = mapSection.transform.Find("Wall_right");
-        Collider wallRCollider = wallRTransform?.gameObject.GetComponent<Collider>();
-        borderR = wallRCollider.bounds.min.z;
     }
 
     private Vector3 GetRandomPositionInBounds(Bounds bounds) {
@@ -198,15 +215,20 @@ public class ObstacleSpawner : MonoBehaviour {
         return matching[index];
     }
 
-    private Bounds GetSafeZone(Obstacle obstacle, GameObject instance) {
+    private Vector3 GetSafeZoneSize(Obstacle obstacle) {
         Vector3 szSize = obstacle.safeZoneSize;
         Vector3 obstacleSize = obstacle.body.GetComponent<Renderer>().bounds.size;
 
         float sizeY = Mathf.Max(maxY, obstacleSize.y);
         Vector3 safeZoneSize = new Vector3(Mathf.Max(szSize.x, obstacleSize.x), sizeY, Mathf.Max(szSize.z, obstacleSize.z));
-        Vector3 safeZoneCenter = new Vector3(instance.transform.position.x, sizeY / 2, instance.transform.position.z);
 
-        return new Bounds(safeZoneCenter, safeZoneSize);
+        return safeZoneSize;
+    }
+
+    private Bounds GetCurrentSafeZone(Vector3 position, Vector3 size) {
+        Vector3 center = new Vector3(position.x, size.y / 2, position.z);
+
+        return new Bounds(center, size);
     }
 
     private Queue<GameObject> GetActiveSections() {

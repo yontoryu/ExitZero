@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public class MapSectionManager : MonoBehaviour {
     public float velocity = 15f;
@@ -9,8 +10,13 @@ public class MapSectionManager : MonoBehaviour {
     private List<GameObject> activeSections = new List<GameObject>();
     public float destroyDistance = 50f;
     private int currentSectionID = 0;
+    ObstacleSpawner obsSpawner;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start() {
+        obsSpawner = GetComponent<ObstacleSpawner>();
+        obsSpawner.CalculateBorders(mapSection);
+
         if (sectionsAhead < 2) {
             Debug.LogError("sectionsAhead must be at least 2");
             sectionsAhead = 2;
@@ -20,7 +26,7 @@ public class MapSectionManager : MonoBehaviour {
         GenerateSectionsOnStart();
     }
 
-    void FixedUpdate() {
+    void Update() {
         for (int i = 0; i < sectionsAhead; i++) {
             GameObject section = activeSections[i];
             Rigidbody sectionRB = section.GetComponent<Rigidbody>();
@@ -29,12 +35,19 @@ public class MapSectionManager : MonoBehaviour {
             if (renderer.bounds.max.x >= destroyDistance) {
                 // destroy the section and generate a new one
                 GenerateNewMapSection();
+                // obsSpawner.RemoveSectionReferences(section);
                 Destroy(section);
                 activeSections.Remove(section);
             }
+        }
 
-            // move the section
-            sectionRB.MovePosition(sectionRB.position + new Vector3(velocity, 0, 0) * Time.deltaTime);
+        obsSpawner.Refresh();
+    }
+
+    void FixedUpdate() {
+        foreach (GameObject section in activeSections) {
+            Rigidbody rb = section.GetComponent<Rigidbody>();
+            rb.MovePosition(rb.position + new Vector3(velocity, 0, 0) * Time.deltaTime);
         }
     }
 
@@ -46,6 +59,11 @@ public class MapSectionManager : MonoBehaviour {
             // generate the first section at the origin
             newSection = Instantiate(mapSection, Vector3.zero, Quaternion.identity, transform);
             newSection.transform.position = transform.position;
+
+            newSection.name = "MapSection_" + currentSectionID;
+            MapSectionID IDComponent = newSection.GetComponent<MapSectionID>();
+            IDComponent.sectionID = currentSectionID;
+            currentSectionID++;
         }
         else {
             //get the last section to determine the position of the new section
@@ -64,12 +82,13 @@ public class MapSectionManager : MonoBehaviour {
             newPosition = new Vector3(newX, lastSection.transform.position.y, lastSection.transform.position.z);
             newSection.transform.position = newPosition;
 
-        }
+            newSection.name = "MapSection_" + currentSectionID;
+            MapSectionID IDComponent = newSection.GetComponent<MapSectionID>();
+            IDComponent.sectionID = currentSectionID;
+            currentSectionID++;
 
-        newSection.name = "MapSection_" + currentSectionID;
-        MapSectionID IDComponent = newSection.GetComponent<MapSectionID>();
-        IDComponent.sectionID = currentSectionID;
-        currentSectionID++;
+            obsSpawner.PopulateSection(newSection);
+        }
 
         activeSections.Add(newSection);
     }
@@ -97,6 +116,14 @@ public class MapSectionManager : MonoBehaviour {
             activeSections.Add(child.gameObject);
 
         return activeSections;
+    }
+
+    public GameObject GetSectionByID(int ID) {
+        foreach (GameObject ms in activeSections) {
+            if (ms.GetComponent<MapSectionID>().sectionID == ID)
+                return ms;
+        }
+        return null;
     }
 
     public void ResetCount() {
