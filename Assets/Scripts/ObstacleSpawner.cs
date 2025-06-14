@@ -1,10 +1,11 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 using Vector3 = UnityEngine.Vector3;
 using static ObstacleType;
+using Unity.VisualScripting;
+using System;
 
 public class ObstacleSpawner : MonoBehaviour {
     [Header("Spawn Settings")]
@@ -21,10 +22,13 @@ public class ObstacleSpawner : MonoBehaviour {
 
     private float borderL, borderR;
 
+    [Header("Safe Zone Settings")]
+    public float maxY = 10f;
+
     [Header("MapSection Settings")]
     public MapSectionManager msManager;
     private Queue<GameObject> sectionsToPopulate = new Queue<GameObject>();
-    private List<GameObject> activeObstacles = new List<GameObject>();
+    private List<(GameObject, Bounds)> activeObstacles = new List<(GameObject, Bounds)>();
 
     [Header("Test")]
     public GameObject mapSectionTest;
@@ -36,12 +40,14 @@ public class ObstacleSpawner : MonoBehaviour {
 
     void Start() {
         sectionsToPopulate = GetActiveSections();
+
         CalculateBorders(msManager.mapSection);
         if (spawnRate < 1) {
             spawnRate = 1;
         }
 
-        PopulateSections();
+        // PopulateSections();
+        popSection(mapSectionTest);
     }
 
     // Update is called once per frame
@@ -50,18 +56,23 @@ public class ObstacleSpawner : MonoBehaviour {
     }
 
     private void SpawnObstacle(GameObject mapSection) {
-        Obstacle randomObstacle = GetRandomObstacle();
-        Bounds spawnArea = GetSpawnArea(mapSection, randomObstacle);
-        DisplaySpawnAreaOnSelected(randomObstacle, spawnArea);
+        Obstacle obstacle = GetRandomObstacle();
+        Bounds spawnArea = GetSpawnArea(mapSection, obstacle);
 
         currentSpawnArea = spawnArea;
         int count = 0;
+        GameObject instantiatedObstacle;
 
         do {
             Vector3 position = GetRandomPositionInBounds(spawnArea);
-            Instantiate(randomObstacle.body, position, Quaternion.identity, mapSection.transform);
+            instantiatedObstacle = Instantiate(obstacle.body, position, Quaternion.identity, mapSection.transform);
             count++;
         } while (!ObstacleSpawnedSafely() && count < maxSpawnAttempts);
+
+        Bounds safeZone = GetSafeZone(obstacle, instantiatedObstacle);
+        activeObstacles.Add((instantiatedObstacle, safeZone));
+        DisplaySafeZoneOnSelected(instantiatedObstacle, safeZone);
+        DisplaySpawnAreaOnSelected(instantiatedObstacle, spawnArea);
     }
 
     public void PopulateSections() {
@@ -175,6 +186,17 @@ public class ObstacleSpawner : MonoBehaviour {
         return matching[index];
     }
 
+    private Bounds GetSafeZone(Obstacle obstacle, GameObject instance) {
+        Vector3 szSize = obstacle.safeZoneSize;
+        Vector3 obstacleSize = obstacle.body.GetComponent<Renderer>().bounds.size;
+
+        float sizeY = Mathf.Max(maxY, obstacleSize.y);
+        Vector3 safeZoneSize = new Vector3(Mathf.Max(szSize.x, obstacleSize.x), sizeY, Mathf.Max(szSize.z, obstacleSize.z));
+        Vector3 safeZoneCenter = new Vector3(instance.transform.position.x, sizeY / 2, instance.transform.position.z);
+
+        return new Bounds(safeZoneCenter, safeZoneSize);
+    }
+
     private Queue<GameObject> GetActiveSections() {
         Queue<GameObject> activeSections = new Queue<GameObject>();
         foreach (Transform section in transform)
@@ -183,7 +205,11 @@ public class ObstacleSpawner : MonoBehaviour {
         return activeSections;
     }
 
-    private void DisplaySpawnAreaOnSelected(Obstacle obstacle, Bounds spawnArea) {
-        obstacle.body.GetComponent<ShowSpawnArea>().spawnArea = spawnArea;
+    private void DisplaySpawnAreaOnSelected(GameObject instance, Bounds spawnArea) {
+        instance.GetComponent<DisplayObstacleAreas>().spawnArea = spawnArea;
+    }
+
+    private void DisplaySafeZoneOnSelected(GameObject instance, Bounds safeZone) {
+        instance.GetComponent<DisplayObstacleAreas>().safeZone = safeZone;
     }
 }

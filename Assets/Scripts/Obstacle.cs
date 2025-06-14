@@ -12,5 +12,5 @@ public class Obstacle : ScriptableObject {
     public ObstacleType type;
     public float floatingCenterY, floatingSizeY;
     public GameObject body;
-    public Vector3 safeZone;
+    public Vector3 safeZoneSize;
 }

@@ -516,6 +516,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 70b52ea0d182021e7b54c7053409b3db, type: 2}
   - {fileID: 11400000, guid: 47d755d10a49c7f1c92a34421fa06d6d, type: 2}
   spawnOffset: 0.01
+  maxY: 10
   msManager: {fileID: 541684062}
   mapSectionTest: {fileID: 1401568094}
   currentSpawnArea:

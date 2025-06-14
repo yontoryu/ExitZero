@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: FlatObstacle1
   m_EditorClassIdentifier: 
   type: 0
-  minY: 0
-  maxY: 0
+  floatingCenterY: 0
+  floatingSizeY: 0
   body: {fileID: 2215178036752769905, guid: 1e90ac4f8ae6cc9b0ab7da6fd2dead35, type: 3}
-  safeZone: {x: 5, y: 4, z: 1.4}
+  safeZoneSize: {x: 6, y: 10, z: 5}
