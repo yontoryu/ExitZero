@@ -16,4 +16,4 @@ MonoBehaviour:
   floatingCenterY: 0
   floatingSizeY: 0
   body: {fileID: 2215178036752769905, guid: 1e90ac4f8ae6cc9b0ab7da6fd2dead35, type: 3}
-  safeZoneSize: {x: 6, y: 10, z: 5}
+  safeZoneSize: {x: 10, y: 10, z: 5}

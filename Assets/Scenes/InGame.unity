@@ -508,7 +508,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ac155b47b14ddc41aa86b7767ed9c21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  spawnRate: 5
+  spawnRate: 3
   randomness: 0
   maxSpawnAttempts: 100
   obstacles:
@@ -522,6 +522,7 @@ MonoBehaviour:
   currentSpawnArea:
     m_Center: {x: 0, y: 0, z: 0}
     m_Extent: {x: 0, y: 0, z: 0}
+  unsafelySpawnedObstacle: {fileID: 3387990700505033174, guid: 7c08342dedd28bb859c0e478d347617f, type: 3}
 --- !u!1001 &808322903
 PrefabInstance:
   m_ObjectHideFlags: 0

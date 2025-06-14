@@ -28,11 +28,12 @@ public class ObstacleSpawner : MonoBehaviour {
     [Header("MapSection Settings")]
     public MapSectionManager msManager;
     private Queue<GameObject> sectionsToPopulate = new Queue<GameObject>();
-    private List<(GameObject, Bounds)> activeObstacles = new List<(GameObject, Bounds)>();
+    private List<Bounds> activeSafeZones = new List<Bounds>();
 
     [Header("Test")]
     public GameObject mapSectionTest;
     public Bounds currentSpawnArea;
+    public GameObject unsafelySpawnedObstacle;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake() {
@@ -46,8 +47,8 @@ public class ObstacleSpawner : MonoBehaviour {
             spawnRate = 1;
         }
 
-        // PopulateSections();
-        popSection(mapSectionTest);
+        PopulateSections();
+        //populateSection(mapSectionTest);
     }
 
     // Update is called once per frame
@@ -62,15 +63,19 @@ public class ObstacleSpawner : MonoBehaviour {
         currentSpawnArea = spawnArea;
         int count = 0;
         GameObject instantiatedObstacle;
+        Vector3 position;
+        GameObject lastInstantiatedWrongObstacle;
 
         do {
-            Vector3 position = GetRandomPositionInBounds(spawnArea);
-            instantiatedObstacle = Instantiate(obstacle.body, position, Quaternion.identity, mapSection.transform);
+            position = GetRandomPositionInBounds(spawnArea);
             count++;
-        } while (!ObstacleSpawnedSafely() && count < maxSpawnAttempts);
+            lastInstantiatedWrongObstacle = Instantiate(unsafelySpawnedObstacle, position, Quaternion.identity, mapSection.transform);
+        } while (IsObstacleInsideSafeZone(obstacle, position) && count < maxSpawnAttempts);
 
+        Destroy(lastInstantiatedWrongObstacle);
+        instantiatedObstacle = Instantiate(obstacle.body, position, Quaternion.identity, mapSection.transform);
         Bounds safeZone = GetSafeZone(obstacle, instantiatedObstacle);
-        activeObstacles.Add((instantiatedObstacle, safeZone));
+        activeSafeZones.Add(safeZone);
         DisplaySafeZoneOnSelected(instantiatedObstacle, safeZone);
         DisplaySpawnAreaOnSelected(instantiatedObstacle, spawnArea);
     }
@@ -85,7 +90,7 @@ public class ObstacleSpawner : MonoBehaviour {
         }
     }
 
-    public void popSection(GameObject mapSection) {
+    public void populateSection(GameObject mapSection) {
         for (int j = 0; j < spawnRate; j++) {
             SpawnObstacle(mapSection);
         }
@@ -97,8 +102,15 @@ public class ObstacleSpawner : MonoBehaviour {
         }
     }
 
-    private bool ObstacleSpawnedSafely() {
-        return true;
+    private bool IsObstacleInsideSafeZone(Obstacle obstacle, Vector3 position) {
+        Bounds boundsToTest = new Bounds(position, obstacle.body.GetComponent<Renderer>().bounds.size);
+
+        foreach (Bounds safeZone in activeSafeZones) {
+            if (boundsToTest.Intersects(safeZone))
+                return true;
+        }
+
+        return false;
     }
 
     private Bounds GetSpawnArea(GameObject mapSection, Obstacle obstacle) {

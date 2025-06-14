@@ -28,7 +28,7 @@ public class MapSectionManager : MonoBehaviour {
 
             if (renderer.bounds.max.x >= destroyDistance) {
                 // destroy the section and generate a new one
-                GenerateNewMapSection(false);
+                GenerateNewMapSection();
                 Destroy(section);
                 activeSections.Remove(section);
             }
@@ -38,7 +38,7 @@ public class MapSectionManager : MonoBehaviour {
         }
     }
 
-    private void GenerateNewMapSection(bool onStart = true) {
+    private void GenerateNewMapSection() {
         int numActiveSections = activeSections.Count;
         GameObject newSection;
 
