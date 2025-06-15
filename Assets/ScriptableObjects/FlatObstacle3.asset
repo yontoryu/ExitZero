@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 8c084658ec152c5349eacaaa571762c5, type: 3}
-  m_Name: TallObstacle1
+  m_Name: FlatObstacle3
   m_EditorClassIdentifier: 
-  type: 1
+  type: 0
   floatingCenterY: 0
   floatingSizeY: 0
-  body: {fileID: 2568918309374822182, guid: 8d32b7fdf3aca29ff953802cd5983d83, type: 3}
-  safeZoneSize: {x: 10, y: 10, z: 10}
+  body: {fileID: 2215178036752769905, guid: a59c3ac4f41027873a493a115a69758a, type: 3}
+  safeZoneSize: {x: 18, y: 0, z: 5}

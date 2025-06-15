@@ -46,7 +46,6 @@ public class PlayerMovementRB : MonoBehaviour {
     }
 
     void Update() {
-        CheckGrounded();
 
         /* ------------------------------ Handle Inputs ----------------------------- */
         // if player is grounded and jump button is pressed
@@ -77,6 +76,7 @@ public class PlayerMovementRB : MonoBehaviour {
     }
 
     void FixedUpdate() {
+        GroundCheck();
         ApplyGravity();
         ApplyMovement();
         // if (isJumping) {
@@ -88,17 +88,37 @@ public class PlayerMovementRB : MonoBehaviour {
         // }
     }
 
-    private void CheckGrounded() {
-        bool wasGrounded = isGrounded; // save the previous grounded state
-        // Check if the player is grounded using a sphere check
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+    // old
+    // private void GroundCheck() {
+    //     bool wasGrounded = isGrounded; // save the previous grounded state
+    //     // Check if the player is grounded using a sphere check
+    //     isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
 
-        // if the player was not grounded and is now grounded, reset the jump and jumpToSlide states
+    //     // if the player was not grounded and is now grounded, reset the jump and jumpToSlide states
+    //     if (isGrounded && !wasGrounded) {
+    //         animator.SetBool("isJumping", false);
+    //         animator.SetBool("jumpToSlide", false);
+    //     }
+    // }
+
+    private void GroundCheck() {
+        bool wasGrounded = isGrounded;
+
+        if (Physics.Raycast(groundCheck.position, Vector3.down, out RaycastHit hit, groundDistance)) {
+            isGrounded = true;
+        }
+        else {
+            isGrounded = false;
+        }
+
+        // Spieler ist gerade gelandet
         if (isGrounded && !wasGrounded) {
+            Debug.Log("Grounded!");
             animator.SetBool("isJumping", false);
             animator.SetBool("jumpToSlide", false);
         }
     }
+
 
     private void ApplyGravity() {
         if (!isGrounded) {
@@ -124,7 +144,7 @@ public class PlayerMovementRB : MonoBehaviour {
     void OnDrawGizmosSelected() {
         if (groundCheck != null) {
             Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(groundCheck.position, groundDistance);
+            Gizmos.DrawLine(groundCheck.position, groundCheck.position + Vector3.down * groundDistance);
         }
 
         Collider[] colliders = GetComponentsInChildren<Collider>();

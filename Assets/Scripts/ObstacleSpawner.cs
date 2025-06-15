@@ -62,31 +62,21 @@ public class ObstacleSpawner : MonoBehaviour {
             if (currentMSID != 0) {
                 // Liste der Obstacles aktualisieren, unnötige rausschmeißen
                 GameObject lastMapSection = msManager.GetSectionByID(currentMSID - 1);
-                string refresh = "-------------------- all Safe Zones --------------------\n";
-                refresh += "activeSafeZones (" + activeSafeZones.Count + "): " + printList(activeSafeZones) + "\n\n";
-                refresh += "current Map Section: " + currentMSID;
-                refresh += "\nlast Map Section: " + lastMapSection.GetComponent<MapSectionID>().sectionID;
-                refresh += "\n\n";
 
                 for (int i = activeSafeZones.Count - 1; i >= 0; i--) {
                     (GameObject obs, Vector3 safeZoneSize) = activeSafeZones[i];
                     Transform obsParentTransform = obs.transform.parent;
-                    refresh += "i = " + i + "\t";
 
                     bool hasParentInLastSections = (obsParentTransform.gameObject == currentMapSection) || (obsParentTransform.gameObject == lastMapSection);
 
                     if (!hasParentInLastSections) {
-                        refresh += "obs: " + obs + "\tparent: " + obsParentTransform + "\tcurrent: " + currentMapSection + "\tlast: " + lastMapSection;
                         activeSafeZones.RemoveAt(i);
                         DisplaySafeZoneOnSelected(obs, new Bounds(Vector3.zero, Vector3.zero));
-                        refresh += " ----> Removing\n";
                         continue;
                     }
                     Vector3 correctedPosition = obs.transform.localPosition + obsParentTransform.gameObject.GetComponent<Rigidbody>().position;
                     DisplaySafeZoneOnSelected(obs, GetCurrentSafeZone(correctedPosition, safeZoneSize));
                 }
-
-                Debug.Log(refresh + "\n\n\n");
             }
         }
     }
@@ -125,7 +115,7 @@ public class ObstacleSpawner : MonoBehaviour {
 
         // Display Gizmos of Spawn Area and Safe Zones
         DisplaySafeZoneOnSelected(instantiatedObstacle, GetCurrentSafeZone(position, safeZoneSize));
-        DisplaySpawnAreaOnSelected(instantiatedObstacle, spawnArea);
+        // DisplaySpawnAreaOnSelected(instantiatedObstacle, spawnArea);
     }
 
     private bool WouldSpawnSafely(Obstacle obstacle, Vector3 position) {
