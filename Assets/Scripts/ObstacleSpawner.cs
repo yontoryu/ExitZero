@@ -88,15 +88,6 @@ public class ObstacleSpawner : MonoBehaviour {
         return res;
     }
 
-    public void RemoveSectionReferences(GameObject mapSection) {
-        for (int i = 0; i < activeSafeZones.Count; i++) {
-            (GameObject obs, Vector3 safeZoneSize) = activeSafeZones[i];
-            if (!(obs.transform.parent == mapSection)) {
-                activeSafeZones.Remove((obs, safeZoneSize));
-            }
-        }
-    }
-
     private void SpawnObstacle(GameObject mapSection) {
         Obstacle obstacle = GetRandomObstacle();    // Generate a random Obstacle
         Bounds spawnArea = GetSpawnArea(mapSection, obstacle);  // Get the Spawn Area according to the obstacle
