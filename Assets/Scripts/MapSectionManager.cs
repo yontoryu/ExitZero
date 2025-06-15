@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
@@ -9,7 +10,7 @@ public class MapSectionManager : MonoBehaviour {
     public int sectionsAhead = 5;
     private List<GameObject> activeSections = new List<GameObject>();
     public float destroyDistance = 50f;
-    private int currentSectionID = 0;
+    private int currentSectionID = 1;
     ObstacleSpawner obsSpawner;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -26,7 +27,25 @@ public class MapSectionManager : MonoBehaviour {
         GenerateSectionsOnStart();
     }
 
-    void Update() {
+    // void Update() {
+    //     for (int i = 0; i < sectionsAhead; i++) {
+    //         GameObject section = activeSections[i];
+    //         Rigidbody sectionRB = section.GetComponent<Rigidbody>();
+    //         Collider renderer = section.GetComponentsInChildren<Collider>()[0];
+
+    //         if (renderer.bounds.max.x >= destroyDistance) {
+    //             // destroy the section and generate a new one
+    //             GenerateNewMapSection();
+    //             // obsSpawner.RemoveSectionReferences(section);
+    //             Destroy(section);
+    //             activeSections.Remove(section);
+    //         }
+    //     }
+
+    //     obsSpawner.Refresh();
+    // }
+
+    void FixedUpdate() {
         for (int i = 0; i < sectionsAhead; i++) {
             GameObject section = activeSections[i];
             Rigidbody sectionRB = section.GetComponent<Rigidbody>();
@@ -35,20 +54,13 @@ public class MapSectionManager : MonoBehaviour {
             if (renderer.bounds.max.x >= destroyDistance) {
                 // destroy the section and generate a new one
                 GenerateNewMapSection();
-                // obsSpawner.RemoveSectionReferences(section);
                 Destroy(section);
                 activeSections.Remove(section);
             }
+            sectionRB.MovePosition(sectionRB.position + new Vector3(velocity, 0, 0) * Time.deltaTime);
         }
 
         obsSpawner.Refresh();
-    }
-
-    void FixedUpdate() {
-        foreach (GameObject section in activeSections) {
-            Rigidbody rb = section.GetComponent<Rigidbody>();
-            rb.MovePosition(rb.position + new Vector3(velocity, 0, 0) * Time.deltaTime);
-        }
     }
 
     private void GenerateNewMapSection() {
@@ -58,7 +70,7 @@ public class MapSectionManager : MonoBehaviour {
         if (numActiveSections == 0) {
             // generate the first section at the origin
             newSection = Instantiate(mapSection, Vector3.zero, Quaternion.identity, transform);
-            newSection.transform.position = transform.position;
+            newSection.GetComponent<Rigidbody>().position = transform.position;
 
             newSection.name = "MapSection_" + currentSectionID;
             MapSectionID IDComponent = newSection.GetComponent<MapSectionID>();
@@ -66,31 +78,33 @@ public class MapSectionManager : MonoBehaviour {
             currentSectionID++;
         }
         else {
-            //get the last section to determine the position of the new section
-            GameObject lastSection = activeSections[numActiveSections - 1];
-
-            // a renderer is needed to get the bounds of a section
-            Collider lastSectionCollider = lastSection.GetComponentsInChildren<Collider>()[0];
-
             // instantiate a new section at 0, 0, 0 as a child of the map section manager
             newSection = Instantiate(mapSection, Vector3.zero, Quaternion.identity, transform);
-
-            Vector3 newPosition;
-            float newX;
-
-            newX = lastSection.transform.position.x - lastSectionCollider.bounds.size.x;
-            newPosition = new Vector3(newX, lastSection.transform.position.y, lastSection.transform.position.z);
-            newSection.transform.position = newPosition;
 
             newSection.name = "MapSection_" + currentSectionID;
             MapSectionID IDComponent = newSection.GetComponent<MapSectionID>();
             IDComponent.sectionID = currentSectionID;
             currentSectionID++;
 
-            obsSpawner.PopulateSection(newSection);
+            //get the last section to determine the position of the new section
+            GameObject lastSection = activeSections[numActiveSections - 1];
+            Rigidbody lastRB = lastSection.GetComponent<Rigidbody>();
+            Collider lastSectionCollider = lastSection.GetComponentsInChildren<Collider>()[0];
+            float sectionLength = lastSectionCollider.bounds.size.x;
+
+            float newX = lastRB.position.x - sectionLength - 0.001f; // minimale Einheit z. B. 1mm Abstand
+            Vector3 newPosition = new Vector3(newX, lastRB.position.y, lastRB.position.z);
+            newSection.GetComponent<Rigidbody>().position = newPosition;
+
+            StartCoroutine(SpawnObstaclesDelayed(newSection));
         }
 
         activeSections.Add(newSection);
+    }
+
+    private IEnumerator SpawnObstaclesDelayed(GameObject section) {
+        yield return new WaitForFixedUpdate(); // wartet den nächsten Physik-Zyklus ab
+        obsSpawner.PopulateSection(section);
     }
 
     private void GenerateSectionsOnStart() {
