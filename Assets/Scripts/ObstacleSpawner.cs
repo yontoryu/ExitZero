@@ -11,7 +11,7 @@ using UnityEngine.Rendering.Universal;
 
 public class ObstacleSpawner : MonoBehaviour {
     [Header("Spawn Settings")]
-    public float spawnRate;
+    public int spawnRate;
     public float randomness;
     public int maxSpawnAttempts = 100;
     public List<Obstacle> obstacles;
@@ -50,6 +50,8 @@ public class ObstacleSpawner : MonoBehaviour {
 
     public void PopulateSection(GameObject mapSection) {
         currentMapSection = mapSection;
+
+
         currentObstacleID = 0;
         for (int j = 0; j < spawnRate; j++) {
             SpawnObstacle(mapSection);

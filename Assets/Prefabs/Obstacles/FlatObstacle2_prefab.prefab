@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5635385380917100949}
   - component: {fileID: 5478309203730533118}
   - component: {fileID: 2367529826611094512}
+  - component: {fileID: 8153680429709970659}
   m_Layer: 0
   m_Name: FlatObstacle2_prefab
   m_TagString: Untagged
@@ -127,3 +128,16 @@ MonoBehaviour:
   safeZone:
     m_Center: {x: 0, y: 0, z: 0}
     m_Extent: {x: 0, y: 0, z: 0}
+--- !u!114 &8153680429709970659
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5969111807953300038}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6257e4f9fbdc22bd3b465fea95d62cab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  obstacleFade: {fileID: 11400000, guid: 2b4294ca7ddb2f97bb60d91f60f7b72d, type: 2}
