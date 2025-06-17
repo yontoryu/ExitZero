@@ -7,21 +7,21 @@ public class EndOfGameMenu : MonoBehaviour {
     public GameObject backgroundPanel;
     public TMP_Text playerWonText;
     public GameManager gameManager;
+    private bool showEndScreen = true;
 
     void Update() {
-        if (gameManager.IsOver()) {
-            PlayerID winner = gameManager.GetWinner();
-            playerWonText.text = winner == PlayerID.None ? "Draw!" : (winner == PlayerID.Player1 ? "Blue " : "Red ") + "Player won!";
+        if (gameManager.IsOver() && showEndScreen) {
+            showEndScreen = false;
             End();
         }
     }
 
     public void End() {
-        if (gameManager.IsOver()) {
-            endPanel.SetActive(true);
-            backgroundPanel.SetActive(true);
-            Time.timeScale = 0;
-        }
+        PlayerID winner = gameManager.GetWinner();
+        playerWonText.text = winner == PlayerID.None ? "Draw!" : (winner == PlayerID.Player1 ? "Blue " : "Red ") + "Player won!";
+        endPanel.SetActive(true);
+        backgroundPanel.SetActive(true);
+        Time.timeScale = 0;
     }
 
     public void Restart() {
