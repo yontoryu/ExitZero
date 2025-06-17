@@ -58,8 +58,10 @@ public class OptionsMenu : MonoBehaviour {
     }
 
     private void SetPaceOnStart() {
-        float pace = PlayerPrefs.GetFloat("Pace", 0.5f);
-        paceSlider.value = pace;
+        if (paceSlider != null) {
+            float pace = PlayerPrefs.GetFloat("Pace", 0.5f);
+            paceSlider.value = pace;
+        }
     }
 
     public void SetPaceSlider(float pace) {

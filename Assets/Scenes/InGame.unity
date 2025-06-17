@@ -1494,20 +1494,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ac155b47b14ddc41aa86b7767ed9c21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minObstacles: 5
-  maxObstacles: 5
+  minObstacles: 10
+  maxObstacles: 10
   randomness: 0
   maxSpawnAttempts: 100
   obstacles:
   - {fileID: 11400000, guid: ddbd222b2961d5249baeb44d983f2f5f, type: 2}
+  - {fileID: 11400000, guid: aaff33ef352d0a6a9b2060e81a4de046, type: 2}
+  - {fileID: 11400000, guid: c2626dfc76439ef5a8a9d197486ac2b1, type: 2}
   - {fileID: 11400000, guid: 70b52ea0d182021e7b54c7053409b3db, type: 2}
+  - {fileID: 11400000, guid: 83faf098b5c1601ea91db51d69228815, type: 2}
+  - {fileID: 11400000, guid: ccfe5d9ac2bc69635873c0aabece64fc, type: 2}
+  - {fileID: 11400000, guid: 2166123a1cfdf87ae848a1fb6419029b, type: 2}
   - {fileID: 11400000, guid: 47d755d10a49c7f1c92a34421fa06d6d, type: 2}
   spawnOffset: 0.01
   maxY: 10
   msManager: {fileID: 541684062}
-  mapSectionTest: {fileID: 0}
-  unsafelySpawnedObstacle: {fileID: 3387990700505033174, guid: 7c08342dedd28bb859c0e478d347617f, type: 3}
-  saveLastNMapSectionsSafeZones: 5
 --- !u!4 &298248148
 Transform:
   m_ObjectHideFlags: 0
@@ -2672,12 +2674,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f582cc3825f98213492a9cd56ecfe400, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  velocity: 30
-  velocityFactor: 0.02
   mapSection: {fileID: 1329609072505232936, guid: 49c462d9a3aa16ab295aec70b425cf37, type: 3}
-  sectionsAhead: 20
+  sectionsAhead: 5
   destroyDistance: 200
   obstacleSpawner: {fileID: 298248147}
+  velocity: 30
+  velocityFactor: 0.02
+  maxVelocityTime: 220
 --- !u!4 &541684063
 Transform:
   m_ObjectHideFlags: 0
@@ -2895,7 +2898,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerStats: {fileID: 11400000, guid: fc4039e7bc1d7f23db0a9e9040d5fd32, type: 2}
-  health: 0
+  health: 10000
 --- !u!114 &585353971
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6067,7 +6070,8 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 2667302187404047703, guid: 27acb23f36450a6f1a22fc765f12313c, type: 3}
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 7709257670860994600, guid: 27acb23f36450a6f1a22fc765f12313c, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 1554665754755057112, guid: 27acb23f36450a6f1a22fc765f12313c, type: 3}
       insertIndex: 0
@@ -7240,7 +7244,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerStats: {fileID: 11400000, guid: fc4039e7bc1d7f23db0a9e9040d5fd32, type: 2}
-  health: 0
+  health: 10000
 --- !u!1 &1513831559
 GameObject:
   m_ObjectHideFlags: 0

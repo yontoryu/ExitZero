@@ -34,15 +34,6 @@ public class ObstacleSpawner : MonoBehaviour {
     private GameObject currentMapSection;
     private int currentObstacleID = 0;
 
-    [Header("Obstacle Movement Settings")]
-    private float velocity;
-    private float velocityFactor;
-
-    void Awake() {
-        velocity = msManager.velocity;
-        velocityFactor = msManager.velocityFactor;
-    }
-
     public void CalculateBorders(GameObject mapSection) {
         Transform wallLTransform = mapSection.transform.Find("Wall_left");
         Collider wallLCollider = wallLTransform?.gameObject.GetComponent<Collider>();
@@ -76,7 +67,8 @@ public class ObstacleSpawner : MonoBehaviour {
                     (int sID, int oID, GameObject obs, Vector3 safeZoneSize) = activeObstacles[i];
                     Rigidbody obsRb = obs.GetComponent<Rigidbody>();
                     DisplaySafeZoneOnSelected(obs, GetCurrentSafeZone(obsRb.position, safeZoneSize));
-                    obsRb.MovePosition(obsRb.position + new Vector3(msManager.velocity, 0, 0) * velocityFactor);
+                    obsRb.MovePosition(obsRb.position + new Vector3(msManager.velocity, 0, 0) * msManager.velocityFactor);
+                    Debug.Log("current Velocity: " + msManager.velocity);
 
                     if (obsRb.position.x > 200) {
                         SafeDeleteObstacle(obs, sID, oID);
@@ -94,10 +86,6 @@ public class ObstacleSpawner : MonoBehaviour {
                 Destroy(obstacle);
             }
         }
-    }
-
-    private void IncreaseDifficultyOverTime() {
-
     }
 
     private void SpawnObstacle(GameObject mapSection) {

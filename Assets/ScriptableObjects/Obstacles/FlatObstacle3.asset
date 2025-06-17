@@ -15,7 +15,7 @@ MonoBehaviour:
   type: 0
   floatingCenterY: 0
   floatingSizeY: 0
-  body: {fileID: 2215178036752769905, guid: 1e90ac4f8ae6cc9b0ab7da6fd2dead35, type: 3}
+  body: {fileID: 2215178036752769905, guid: a59c3ac4f41027873a493a115a69758a, type: 3}
   safeZoneSize: {x: 10, y: 10, z: 5}
   baseDamage: 20
   extraDamage: 20
