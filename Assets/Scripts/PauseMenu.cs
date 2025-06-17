@@ -8,23 +8,22 @@ public class PauseMenu : MonoBehaviour {
     public GameObject backgroundPanel;
     private bool isPaused;
     private string inputPause;
+    public GameManager gameManager;
 
     void Awake() {
         inputPause = "Pause";
     }
 
-    void Start() {
-        MusicManager.Instance.PlayMusic(mainMenuIntroClip, mainMenuLoopClip);
-    }
-
     void Update() {
-        if (!isPaused && Input.GetButtonDown(inputPause)) {
-            isPaused = true;
-            Pause();
-        }
-        else if (isPaused && Input.GetButtonDown(inputPause)) {
-            isPaused = false;
-            Resume();
+        if (!gameManager.IsOver()) {
+            if (!isPaused && Input.GetButtonDown(inputPause)) {
+                isPaused = true;
+                Pause();
+            }
+            else if (isPaused && Input.GetButtonDown(inputPause)) {
+                isPaused = false;
+                Resume();
+            }
         }
     }
 

@@ -7,10 +7,12 @@ public enum ObstacleType {
     Floating
 }
 
-[CreateAssetMenu(fileName = "Obstacle", menuName = "Scriptable Objects/Obstacle")]
-public class Obstacle : ScriptableObject {
+[CreateAssetMenu(fileName = "ObstacleSO", menuName = "Scriptable Objects/ObstacleSO")]
+public class ObstacleSO : ScriptableObject {
     public ObstacleType type;
     public float floatingCenterY, floatingSizeY;
     public GameObject body;
     public Vector3 safeZoneSize;
+    public int baseDamage;
+    public int extraDamage;
 }

@@ -6,17 +6,17 @@ using UnityEngine.Rendering.Universal;
 
 public class MapSectionManager : MonoBehaviour {
     public float velocity = 15f;
+    public float velocityFactor = 0.02f;
     public GameObject mapSection;
     public int sectionsAhead = 5;
     private List<GameObject> activeSections = new List<GameObject>();
     public float destroyDistance = 50f;
     private int currentSectionID = 1;
-    ObstacleSpawner obsSpawner;
+    public ObstacleSpawner obstacleSpawner;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start() {
-        obsSpawner = GetComponent<ObstacleSpawner>();
-        obsSpawner.CalculateBorders(mapSection);
+        obstacleSpawner.CalculateBorders(mapSection);
 
         if (sectionsAhead < 2) {
             Debug.LogError("sectionsAhead must be at least 2");
@@ -27,40 +27,21 @@ public class MapSectionManager : MonoBehaviour {
         GenerateSectionsOnStart();
     }
 
-    // void Update() {
-    //     for (int i = 0; i < sectionsAhead; i++) {
-    //         GameObject section = activeSections[i];
-    //         Rigidbody sectionRB = section.GetComponent<Rigidbody>();
-    //         Collider renderer = section.GetComponentsInChildren<Collider>()[0];
-
-    //         if (renderer.bounds.max.x >= destroyDistance) {
-    //             // destroy the section and generate a new one
-    //             GenerateNewMapSection();
-    //             // obsSpawner.RemoveSectionReferences(section);
-    //             Destroy(section);
-    //             activeSections.Remove(section);
-    //         }
-    //     }
-
-    //     obsSpawner.Refresh();
-    // }
-
     void FixedUpdate() {
         for (int i = 0; i < sectionsAhead; i++) {
+            obstacleSpawner.Refresh();
             GameObject section = activeSections[i];
             Rigidbody sectionRB = section.GetComponent<Rigidbody>();
             Collider renderer = section.GetComponentsInChildren<Collider>()[0];
 
             if (renderer.bounds.max.x >= destroyDistance) {
                 // destroy the section and generate a new one
-                GenerateNewMapSection();
                 Destroy(section);
+                GenerateNewMapSection();
                 activeSections.Remove(section);
             }
-            sectionRB.MovePosition(sectionRB.position + new Vector3(velocity, 0, 0) * Time.deltaTime);
+            sectionRB.MovePosition(sectionRB.position + new Vector3(velocity, 0, 0) * velocityFactor);
         }
-
-        obsSpawner.Refresh();
     }
 
     private void GenerateNewMapSection() {
@@ -104,7 +85,7 @@ public class MapSectionManager : MonoBehaviour {
 
     private IEnumerator SpawnObstaclesDelayed(GameObject section) {
         yield return new WaitForFixedUpdate(); // wartet den nächsten Physik-Zyklus ab
-        obsSpawner.PopulateSection(section);
+        obstacleSpawner.PopulateSection(section);
     }
 
     private void GenerateSectionsOnStart() {
@@ -130,6 +111,10 @@ public class MapSectionManager : MonoBehaviour {
             activeSections.Add(child.gameObject);
 
         return activeSections;
+    }
+
+    public int GetID(GameObject mapSection) {
+        return mapSection.GetComponent<MapSectionID>().sectionID;
     }
 
     public GameObject GetSectionByID(int ID) {

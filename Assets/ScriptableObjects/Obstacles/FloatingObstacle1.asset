@@ -17,3 +17,5 @@ MonoBehaviour:
   floatingSizeY: 0.25
   body: {fileID: 3100130663012529262, guid: c21fe88106eaaa2f88a05eddf3985afc, type: 3}
   safeZoneSize: {x: 15, y: 10, z: 5}
+  baseDamage: 10
+  extraDamage: 20

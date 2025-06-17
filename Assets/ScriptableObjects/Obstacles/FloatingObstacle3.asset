@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: FloatingObstacle3
   m_EditorClassIdentifier: 
   type: 2
-  floatingCenterY: 2.5
+  floatingCenterY: 1.75
   floatingSizeY: 0.25
-  body: {fileID: 3100130663012529262, guid: 474e9ad603d81de428b1bbf2a19a271c, type: 3}
-  safeZoneSize: {x: 20, y: 10, z: 5}
+  body: {fileID: 3100130663012529262, guid: c21fe88106eaaa2f88a05eddf3985afc, type: 3}
+  safeZoneSize: {x: 15, y: 10, z: 5}
+  baseDamage: 10
+  extraDamage: 20

@@ -15,7 +15,7 @@ public class ObstacleSpawner : MonoBehaviour {
     public int maxObstacles;
     public float randomness;
     public int maxSpawnAttempts = 100;
-    public List<Obstacle> obstacles;
+    public List<ObstacleSO> obstacles;
     public float spawnOffset = 0.05f;
     Dictionary<ObstacleType, float> obstacleWeights = new() {
         { Flat, 0.6f },
@@ -30,14 +30,18 @@ public class ObstacleSpawner : MonoBehaviour {
 
     [Header("MapSection Settings")]
     public MapSectionManager msManager;
-    private List<(GameObject, Vector3)> activeSafeZones = new List<(GameObject, Vector3)>();
+    private List<(int, int, GameObject, Vector3)> activeObstacles = new List<(int, int, GameObject, Vector3)>();
     private GameObject currentMapSection;
     private int currentObstacleID = 0;
 
-    [Header("Test")]
-    public GameObject mapSectionTest;
-    public GameObject unsafelySpawnedObstacle;
-    public int saveLastNMapSectionsSafeZones = 15;
+    [Header("Obstacle Movement Settings")]
+    private float velocity;
+    private float velocityFactor;
+
+    void Awake() {
+        velocity = msManager.velocity;
+        velocityFactor = msManager.velocityFactor;
+    }
 
     public void CalculateBorders(GameObject mapSection) {
         Transform wallLTransform = mapSection.transform.Find("Wall_left");
@@ -50,6 +54,8 @@ public class ObstacleSpawner : MonoBehaviour {
     }
 
     public void PopulateSection(GameObject mapSection) {
+        CalculateBorders(mapSection);
+
         currentMapSection = mapSection;
 
         int spawnRate = Random.Range(minObstacles, maxObstacles + 1);
@@ -62,40 +68,43 @@ public class ObstacleSpawner : MonoBehaviour {
 
     public void Refresh() {
         if (currentMapSection != null) {
-            int currentMSID = currentMapSection.GetComponent<MapSectionID>().sectionID;
+            int currentMSID = msManager.GetID(currentMapSection);
             if (currentMSID != 0) {
                 // Liste der Obstacles aktualisieren, unnötige rausschmeißen
-                GameObject lastMapSection = msManager.GetSectionByID(currentMSID - 1);
 
-                for (int i = activeSafeZones.Count - 1; i >= 0; i--) {
-                    (GameObject obs, Vector3 safeZoneSize) = activeSafeZones[i];
-                    Transform obsParentTransform = obs.transform.parent;
+                for (int i = activeObstacles.Count - 1; i >= 0; i--) {
+                    (int sID, int oID, GameObject obs, Vector3 safeZoneSize) = activeObstacles[i];
+                    Rigidbody obsRb = obs.GetComponent<Rigidbody>();
+                    DisplaySafeZoneOnSelected(obs, GetCurrentSafeZone(obsRb.position, safeZoneSize));
+                    obsRb.MovePosition(obsRb.position + new Vector3(msManager.velocity, 0, 0) * velocityFactor);
 
-                    bool hasParentInLastSections = (obsParentTransform.gameObject == currentMapSection) || (obsParentTransform.gameObject == lastMapSection);
-
-                    if (!hasParentInLastSections) {
-                        activeSafeZones.RemoveAt(i);
-                        DisplaySafeZoneOnSelected(obs, new Bounds(Vector3.zero, Vector3.zero));
-                        continue;
+                    if (obsRb.position.x > 200) {
+                        SafeDeleteObstacle(obs, sID, oID);
                     }
-                    Vector3 correctedPosition = obs.transform.localPosition + obsParentTransform.gameObject.GetComponent<Rigidbody>().position;
-                    DisplaySafeZoneOnSelected(obs, GetCurrentSafeZone(correctedPosition, safeZoneSize));
                 }
             }
         }
     }
 
-    string printList(List<(GameObject, Vector3)> a) {
-        string res = "";
-        foreach ((GameObject obs, Vector3 size) in a) {
-            res += "(" + obs.name + ", " + size + ");  ";
+    public void SafeDeleteObstacle(GameObject obstacle, int sectionID, int obstacleID) {
+        for (int i = 0; i < activeObstacles.Count; i++) {
+            (int sID, int oID, GameObject obs, Vector3 sA) = activeObstacles[i];
+            if (sID == sectionID && oID == obstacleID) {
+                activeObstacles.Remove((sectionID, obstacleID, obs, sA));
+                Destroy(obstacle);
+            }
         }
-        return res;
+    }
+
+    private void IncreaseDifficultyOverTime() {
+
     }
 
     private void SpawnObstacle(GameObject mapSection) {
-        Obstacle obstacle = GetRandomObstacle();    // Generate a random Obstacle
+        ObstacleSO obstacle = GetRandomObstacle();    // Generate a random Obstacle
         Bounds spawnArea = GetSpawnArea(mapSection, obstacle);  // Get the Spawn Area according to the obstacle
+        // Debug.Log("Spawn Area MS " + msManager.GetID(mapSection) + ": " + spawnArea.center);
+        int sectionID = msManager.GetID(mapSection);
 
         int count = 0;
         GameObject instantiatedObstacle;
@@ -110,25 +119,28 @@ public class ObstacleSpawner : MonoBehaviour {
             //lastInstantiatedWrongObstacle = Instantiate(unsafelySpawnedObstacle, position, Quaternion.identity, mapSection.transform);
         } while (WouldSpawnSafely(obstacle, position) && count < maxSpawnAttempts);
 
-        //Destroy(lastInstantiatedWrongObstacle);
-        instantiatedObstacle = Instantiate(obstacle.body, position, Quaternion.identity, mapSection.transform);
-        instantiatedObstacle.name += "_" + mapSection.GetComponent<MapSectionID>().sectionID + "." + currentObstacleID;
-        currentObstacleID++;
-        Vector3 safeZoneSize = GetSafeZoneSize(obstacle);
-        activeSafeZones.Add((instantiatedObstacle, safeZoneSize));
+        if (count < maxSpawnAttempts) {
+            //Destroy(lastInstantiatedWrongObstacle);
+            instantiatedObstacle = Instantiate(obstacle.body, position, Quaternion.identity);
+            instantiatedObstacle.name += "_" + sectionID + "." + currentObstacleID;
+            currentObstacleID++;
+            Vector3 safeZoneSize = GetSafeZoneSize(obstacle);
+            activeObstacles.Add((sectionID, currentObstacleID, instantiatedObstacle, safeZoneSize));
+            instantiatedObstacle.GetComponent<ObstacleCollisionHandler>().Initialize(this, sectionID, currentObstacleID, obstacle.baseDamage, obstacle.extraDamage);
 
-        // Display Gizmos of Spawn Area and Safe Zones
-        DisplaySafeZoneOnSelected(instantiatedObstacle, GetCurrentSafeZone(position, safeZoneSize));
-        // DisplaySpawnAreaOnSelected(instantiatedObstacle, spawnArea);
+            // Display Gizmos of Spawn Area and Safe Zones
+            DisplaySafeZoneOnSelected(instantiatedObstacle, GetCurrentSafeZone(position, safeZoneSize));
+            // DisplaySpawnAreaOnSelected(instantiatedObstacle, spawnArea);
+        }
     }
 
-    private bool WouldSpawnSafely(Obstacle obstacle, Vector3 position) {
+    private bool WouldSpawnSafely(ObstacleSO obstacle, Vector3 position) {
         Bounds newObstacleBounds = new Bounds(position, obstacle.body.GetComponent<Renderer>().bounds.size);
         Bounds newObstacleSafeZone = GetCurrentSafeZone(position, GetSafeZoneSize(obstacle));
 
-        foreach ((GameObject obsInstance, Vector3 safeZoneSize) in activeSafeZones) {
-            Vector3 correctedPosition = obsInstance.transform.localPosition + obsInstance.transform.parent.gameObject.GetComponent<Rigidbody>().position;
-            Bounds safeZone = GetCurrentSafeZone(correctedPosition, safeZoneSize);
+        foreach ((_, _, GameObject obsInstance, Vector3 safeZoneSize) in activeObstacles) {
+            Rigidbody obsRb = obsInstance.GetComponent<Rigidbody>();
+            Bounds safeZone = GetCurrentSafeZone(obsRb.position, safeZoneSize);
             if (newObstacleBounds.Intersects(safeZone) ||
                 obsInstance.GetComponent<Renderer>().bounds.Intersects(newObstacleSafeZone)) {
                 return true;
@@ -138,9 +150,7 @@ public class ObstacleSpawner : MonoBehaviour {
         return false;
     }
 
-    private Bounds GetSpawnArea(GameObject mapSection, Obstacle obstacle) {
-        CalculateBorders(mapSection);
-
+    private Bounds GetSpawnArea(GameObject mapSection, ObstacleSO obstacle) {
         Renderer obRenderer = obstacle.body.GetComponent<Renderer>();
 
         // width of spawnArea = width of MapSection (from left to right wall) - width of obstacle - offset
@@ -199,7 +209,7 @@ public class ObstacleSpawner : MonoBehaviour {
         return weights.Keys.First();
     }
 
-    private Obstacle GetRandomObstacle() {
+    private ObstacleSO GetRandomObstacle() {
         ObstacleType selectedType = GetRandomObstacleType(obstacleWeights);
 
         var matching = obstacles.Where(o => o.type == selectedType).ToList();
@@ -213,7 +223,7 @@ public class ObstacleSpawner : MonoBehaviour {
         return matching[index];
     }
 
-    private Vector3 GetSafeZoneSize(Obstacle obstacle) {
+    private Vector3 GetSafeZoneSize(ObstacleSO obstacle) {
         Vector3 szSize = obstacle.safeZoneSize;
         Vector3 obstacleSize = obstacle.body.GetComponent<Renderer>().bounds.size;
 
@@ -227,14 +237,6 @@ public class ObstacleSpawner : MonoBehaviour {
         Vector3 center = new Vector3(position.x, size.y / 2, position.z);
 
         return new Bounds(center, size);
-    }
-
-    private Queue<GameObject> GetActiveSections() {
-        Queue<GameObject> activeSections = new Queue<GameObject>();
-        foreach (Transform section in transform)
-            activeSections.Enqueue(section.gameObject);
-
-        return activeSections;
     }
 
     private void DisplaySpawnAreaOnSelected(GameObject instance, Bounds spawnArea) {

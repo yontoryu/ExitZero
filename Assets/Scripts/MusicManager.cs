@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Audio;
 
 public class MusicManager : MonoBehaviour {
-    public static MusicManager Instance;
+    private static MusicManager Instance;
     public AudioSource introSource;
     public AudioSource loopSource;
     public AudioMixer mixer;
@@ -14,20 +14,12 @@ public class MusicManager : MonoBehaviour {
     public float fadeInTime = 2f;
 
     private void Awake() {
-        // if (Instance != null && Instance != this) {
-        //     Destroy(gameObject);
-        //     return;
-        // }
-
-        // Instance = this;
-        // DontDestroyOnLoad(gameObject);
-
         float volume = PlayerPrefs.GetFloat("Volume", 0.7f);
         mixer.SetFloat("Volume", LinearToDecibel(volume));
     }
 
     void Start() {
-        Instance.PlayMusic(introSource.clip, loopSource.clip);
+        PlayMusic(introSource.clip, loopSource.clip);
     }
 
     public void PlayMusic(AudioClip introClip, AudioClip loopClip) {

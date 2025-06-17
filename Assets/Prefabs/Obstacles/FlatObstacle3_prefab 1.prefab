@@ -13,7 +13,8 @@ GameObject:
   - component: {fileID: 2667934063207291191}
   - component: {fileID: 1613404635647014147}
   - component: {fileID: -8737229291219449483}
-  - component: {fileID: -7143887801930984189}
+  - component: {fileID: 7117919691018620643}
+  - component: {fileID: 2601534617068226376}
   m_Layer: 3
   m_Name: FlatObstacle3_prefab 1
   m_TagString: Untagged
@@ -128,16 +129,42 @@ MonoBehaviour:
   safeZone:
     m_Center: {x: 0, y: 0, z: 0}
     m_Extent: {x: 0, y: 0, z: 0}
---- !u!114 &-7143887801930984189
+--- !u!54 &7117919691018620643
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2215178036752769905}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 124
+  m_CollisionDetection: 0
+--- !u!114 &2601534617068226376
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2215178036752769905}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6257e4f9fbdc22bd3b465fea95d62cab, type: 3}
+  m_Script: {fileID: 11500000, guid: 21c9ad20813a6f80392628b5192ed67f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  obstacleFade: {fileID: 11400000, guid: 2b4294ca7ddb2f97bb60d91f60f7b72d, type: 2}
