@@ -18,7 +18,12 @@ public class EndOfGameMenu : MonoBehaviour {
 
     public void End() {
         PlayerID winner = gameManager.GetWinner();
-        playerWonText.text = winner == PlayerID.None ? "Draw!" : (winner == PlayerID.Player1 ? "Blue " : "Red ") + "Player won!";
+        if (MainMenu.mode == PlayerMode.Single) {
+            playerWonText.text = "Game Over!";
+        }
+        else {
+            playerWonText.text = winner == PlayerID.None ? "Draw!" : (winner == PlayerID.Player1 ? "Blue " : "Red ") + "Player won!";
+        }
         endPanel.SetActive(true);
         backgroundPanel.SetActive(true);
         Time.timeScale = 0;

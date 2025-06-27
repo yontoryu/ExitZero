@@ -11,44 +11,7 @@ public class MapSectionManager : MonoBehaviour {
     public float destroyDistance = 50f;
     private int currentSectionID = 1;
     public ObstacleSpawner obstacleSpawner;
-
-    [Header("Difficulty Settings")]
-    public float velocity = 15f;
-    private float startVelocity;
-    private float endVelocity;
-    public float velocityFactor = 0.02f;
-    private float difficulty;
-    public int maxVelocityTime = 220;
-
-    void Awake() {
-        difficulty = PlayerPrefs.GetFloat("Pace", 0.5f);
-        Debug.Log("diff " + difficulty);
-
-        startVelocity = GetStartVelocity(difficulty);
-        endVelocity = GetEndVelocity(difficulty);
-    }
-
-    private float GetStartVelocity(float difficulty) {
-        return 5 * difficulty + 15;
-    }
-
-    private float GetEndVelocity(float difficulty) {
-        return 12 * difficulty + 18;
-    }
-
-    private float GetCurrentVelocity() {
-        float t = Time.time;
-        if (t > maxVelocityTime) {
-            return endVelocity;
-        }
-        else {
-            return (endVelocity - startVelocity) / maxVelocityTime * t + startVelocity;
-        }
-    }
-
-    public void SetVelocity() {
-        velocity = GetCurrentVelocity();
-    }
+    public GameManager gameManager;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start() {
@@ -58,13 +21,8 @@ public class MapSectionManager : MonoBehaviour {
             Debug.LogError("sectionsAhead must be at least 2");
             sectionsAhead = 2;
         }
-        Debug.Log("Map size: " + mapSection.GetComponentsInChildren<Renderer>()[0].bounds.size);
 
         GenerateSectionsOnStart();
-    }
-
-    void Update() {
-        SetVelocity();
     }
 
     void FixedUpdate() {
@@ -80,7 +38,7 @@ public class MapSectionManager : MonoBehaviour {
                 GenerateNewMapSection();
                 activeSections.Remove(section);
             }
-            sectionRB.MovePosition(sectionRB.position + new Vector3(velocity, 0, 0) * velocityFactor);
+            sectionRB.MovePosition(sectionRB.position + new Vector3(gameManager.GetCurrentVelocity(), 0, 0) * gameManager.velocityFactor);
         }
     }
 
